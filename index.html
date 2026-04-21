@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>СтройУчёт</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">
+        <div class="logo-icon">🏗️</div>
+        <div>
+            <div>СтройУчёт</div>
+            <div style="font-size:12px;opacity:0.6;font-weight:400">Управление персоналом</div>
+        </div>
+    </div>
+    <div class="header-date" id="headerDate"></div>
+</div>
+
+<div class="nav">
+    <button class="nav-btn active" onclick="showTab('dashboard',this)">📊 <span class="nav-text">Главная</span></button>
+    <button class="nav-btn" onclick="showTab('workers',this)">👷 <span class="nav-text">Сотрудники</span></button>
+    <button class="nav-btn" onclick="showTab('timesheet',this)">📅 <span class="nav-text">Табель</span></button>
+    <button class="nav-btn" onclick="showTab('payroll',this)">💰 <span class="nav-text">Бухгалтерия</span></button>
+    <button class="nav-btn" onclick="showTab('payments',this)">💳 <span class="nav-text">Выплаты</span></button>
+</div>
+
+<nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+        <button class="bnav-btn active" onclick="showTab('dashboard',this)" data-tab="dashboard">
+            <span class="bnav-icon">📊</span>Главная
+        </button>
+        <button class="bnav-btn" onclick="showTab('workers',this)" data-tab="workers">
+            <span class="bnav-icon">👷</span>Сотрудники
+        </button>
+        <button class="bnav-btn" onclick="showTab('timesheet',this)" data-tab="timesheet">
+            <span class="bnav-icon">📅</span>Табель
+        </button>
+        <button class="bnav-btn" onclick="showTab('payroll',this)" data-tab="payroll">
+            <span class="bnav-icon">💰</span>Бухгалтерия
+        </button>
+        <button class="bnav-btn" onclick="showTab('payments',this)" data-tab="payments">
+            <span class="bnav-icon">💳</span>Выплаты
+        </button>
+    </div>
+</nav>
+
+<div class="main">
+
+    <!-- DASHBOARD -->
+    <div id="tab-dashboard" class="tab active">
+        <div class="page-title">📊 Сводка</div>
+        <div class="page-sub">Актуальная информация по текущему месяцу</div>
+        <div class="stats-grid">
+            <div class="stat-card orange">
+                <div class="stat-label">Всего сотрудников</div>
+                <div class="stat-value" id="d-workers">0</div>
+                <div class="stat-icon">👷</div>
+            </div>
+            <div class="stat-card green">
+                <div class="stat-label">Отработано смен</div>
+                <div class="stat-value" id="d-shifts">0</div>
+                <div class="stat-icon">📅</div>
+            </div>
+            <div class="stat-card blue">
+                <div class="stat-label">Начислено (месяц)</div>
+                <div class="stat-value" id="d-accrued">0 ₽</div>
+                <div class="stat-icon">💰</div>
+            </div>
+            <div class="stat-card red">
+                <div class="stat-label">К выплате (остаток)</div>
+                <div class="stat-value" id="d-debt">0 ₽</div>
+                <div class="stat-icon">💳</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">📋 Сводка по сотрудникам</div>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr>
+                        <th>Сотрудник</th><th>Должность</th><th>Ставка/день</th>
+                        <th>Дней отр.</th><th>Начислено</th><th>Аванс</th>
+                        <th>К выплате</th><th>Статус</th>
+                    </tr></thead>
+                    <tbody id="d-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- WORKERS -->
+    <div id="tab-workers" class="tab">
+        <div class="page-title">👷 Сотрудники</div>
+        <div class="page-sub">База данных рабочих и специалистов</div>
+        <div class="card">
+            <div class="card-header">
+                <div class="filter-bar">
+                    <input class="search" type="text" id="w-search" placeholder="🔍 Поиск..." oninput="renderWorkers()">
+                    <select class="form-control" style="width:180px" id="w-pos-filter" onchange="renderWorkers()">
+                        <option value="">Все должности</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="openWorkerModal()">+ Добавить</button>
+            </div>
+            <div class="worker-grid" id="workers-grid"></div>
+        </div>
+    </div>
+
+    <!-- TIMESHEET -->
+    <div id="tab-timesheet" class="tab">
+        <div class="page-title">📅 Табель рабочего времени</div>
+        <div class="page-sub">Отметьте присутствие сотрудников по дням</div>
+        <div class="card">
+            <div class="card-header">
+                <div class="row-flex gap16 wrap">
+                    <div class="month-nav">
+                        <button onclick="changeMonth('ts',-1)">&#8592;</button>
+                        <div class="month-label" id="ts-label"></div>
+                        <button onclick="changeMonth('ts',1)">&#8594;</button>
+                    </div>
+                    <select class="form-control" style="width:200px" id="ts-filter" onchange="renderTimesheet()">
+                        <option value="">Все сотрудники</option>
+                    </select>
+                </div>
+                <button class="btn btn-success" onclick="markAllToday()">✓ Отметить всех сегодня</button>
+            </div>
+            <div class="ts-wrap" id="ts-container"></div>
+        </div>
+    </div>
+
+    <!-- PAYROLL -->
+    <div id="tab-payroll" class="tab">
+        <div class="page-title">💰 Бухгалтерия</div>
+        <div class="page-sub">Расчёт заработной платы за выбранный месяц</div>
+        <div class="card">
+            <div class="card-header">
+                <div class="month-nav">
+                    <button onclick="changeMonth('pr',-1)">&#8592;</button>
+                    <div class="month-label" id="pr-label"></div>
+                    <button onclick="changeMonth('pr',1)">&#8594;</button>
+                </div>
+                <button class="btn btn-outline" onclick="exportCSV()">📥 Экспорт CSV</button>
+            </div>
+            <div class="payroll-summary" id="pr-summary"></div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr>
+                        <th>#</th><th>ФИО</th><th>Должность</th><th>Ставка/день</th>
+                        <th>Раб.дней</th><th>Отраб.</th><th>Начислено</th>
+                        <th>Аванс</th><th>К выплате</th>
+                    </tr></thead>
+                    <tbody id="pr-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAYMENTS -->
+    <div id="tab-payments" class="tab">
+        <div class="page-title">💳 Выплаты и авансы</div>
+        <div class="page-sub">Управление выплатами сотрудникам</div>
+        <div class="pay-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">📤 Выдать выплату</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Сотрудник</label>
+                    <select class="form-control" id="pay-worker">
+                        <option value="">Выберите сотрудника</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Месяц</label>
+                    <input type="month" class="form-control" id="pay-month">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Тип выплаты</label>
+                    <select class="form-control" id="pay-type">
+                        <option value="advance">Аванс</option>
+                        <option value="full">Полный расчёт</option>
+                        <option value="bonus">Премия</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Сумма (₽)</label>
+                    <input type="number" class="form-control" id="pay-amount" placeholder="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Комментарий</label>
+                    <input type="text" class="form-control" id="pay-comment" placeholder="Примечание...">
+                </div>
+                <button class="btn btn-success" style="width:100%" onclick="addPayment()">💾 Зафиксировать</button>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">📜 История выплат</div>
+                    <select class="form-control" style="width:180px" id="pay-hist-filter" onchange="renderPayHistory()">
+                        <option value="">Все сотрудники</option>
+                    </select>
+                </div>
+                <div class="pay-history" id="pay-history"></div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top:0">
+            <div class="card-header">
+                <div class="card-title">💰 Остатки к выплате</div>
+                <div class="month-nav">
+                    <button onclick="changeMonth('pm',-1)">&#8592;</button>
+                    <div class="month-label" id="pm-label"></div>
+                    <button onclick="changeMonth('pm',1)">&#8594;</button>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr>
+                        <th>Сотрудник</th><th>Должность</th><th>Начислено</th>
+                        <th>Авансы</th><th>Премии</th><th>Выплачено</th>
+                        <th>Остаток</th><th>Статус</th>
+                    </tr></thead>
+                    <tbody id="pm-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL: Worker -->
+<div class="overlay" id="modal-worker">
+    <div class="modal">
+        <div class="modal-title">👷 <span id="modal-worker-title">Добавить сотрудника</span></div>
+        <input type="hidden" id="w-edit-id">
+        <div class="form-group">
+            <label class="form-label">ФИО *</label>
+            <input type="text" class="form-control" id="w-name" placeholder="Иванов Иван Иванович">
+        </div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">Должность *</label>
+                <input type="text" class="form-control" id="w-pos" placeholder="Каменщик" list="pos-list">
+                <datalist id="pos-list">
+                    <option value="Каменщик"><option value="Штукатур"><option value="Маляр">
+                    <option value="Электрик"><option value="Сантехник"><option value="Сварщик">
+                    <option value="Прораб"><option value="Разнорабочий"><option value="Бетонщик">
+                    <option value="Кровельщик"><option value="Плотник"><option value="Монтажник">
+                </datalist>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Ставка за смену (₽) *</label>
+                <input type="number" class="form-control" id="w-rate" placeholder="2500" min="0">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Телефон</label>
+            <input type="text" class="form-control" id="w-phone" placeholder="+7 (___) ___-__-__">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Дата приёма</label>
+            <input type="date" class="form-control" id="w-date">
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('modal-worker')">Отмена</button>
+            <button class="btn btn-primary" onclick="saveWorker()">💾 Сохранить</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Confirm -->
+<div class="overlay" id="modal-confirm">
+    <div class="modal" style="max-width:380px">
+        <div class="modal-title">⚠️ Подтверждение</div>
+        <p id="confirm-text" style="color:#666;line-height:1.6;margin-bottom:8px"></p>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('modal-confirm')">Отмена</button>
+            <button class="btn btn-danger" id="confirm-btn">Удалить</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast-box" id="toasts"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
