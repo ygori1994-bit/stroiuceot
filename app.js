@@ -248,9 +248,9 @@ function renderTimesheet() {
         }).join('');
         document.getElementById('ts-container').innerHTML = `
             <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--light);border-bottom:1px solid #ddd">
-                <button class="btn btn-sm btn-outline" onclick="tsWeekOffset--;renderTimesheet()">&#8592;</button>
+                <button class="btn btn-sm btn-outline" onclick="changeWeek(-1)">&#8592;</button>
                 <span style="font-weight:600;font-size:14px;color:var(--secondary)">${weekLabel}</span>
-                <button class="btn btn-sm btn-outline" onclick="tsWeekOffset++;renderTimesheet()">&#8594;</button>
+                <button class="btn btn-sm btn-outline" onclick="changeWeek(1)">&#8594;</button>
             </div>
             <table><thead><tr><th class="emp-col dh">Сотрудник</th>${dayHeaders}<th class="dh total-col">Итого</th></tr></thead><tbody>${rows}</tbody></table>`;
     } else {
@@ -275,7 +275,7 @@ function renderTimesheet() {
     }
 }
 window.renderTimesheet = renderTimesheet;
-window.tsWeekOffset = tsWeekOffset;
+window.changeWeek = function(dir) { tsWeekOffset += dir; renderTimesheet(); };
 
 // ===== PAYROLL =====
 function getWorkerStats(wid, y, m) {
